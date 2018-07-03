@@ -24,11 +24,16 @@ int main(int argc, char* argv[])
 		fprintf(stderr,"usage: %s image1, image2", argv[0]);
 		exit(1);
 	}
-	src[0] = imread(argv[1]);
-	src[1] = imread(argv[2]);
+	auto tmp1 = imread(argv[1]);
+	auto tmp2 = imread(argv[2]);
+	//src[0] = imread(argv[1]);
+	//src[1] = imread(argv[2]);
+
+	cv::flip(tmp1, src[0], -1);
+	cv::flip(tmp2, src[1], -1);
+
 	cv::cvtColor(src[0], gray[0], CV_BGR2GRAY);
 	cv::cvtColor(src[1], gray[1], CV_BGR2GRAY);
-
 	cv::SiftFeatureDetector detector(1000);
 	cv::SiftDescriptorExtractor extrator;
 
@@ -38,7 +43,6 @@ int main(int argc, char* argv[])
 		detector.detect(gray[i], keypoints[i]);
 		extrator.compute(gray[i], keypoints[i], descriptors[i]);
 	}
-	printf("filename = %s , line = %d\n",__FILE__,__LINE__ );
 
 	vector<cv::DMatch> matches;
 	cv::BruteForceMatcher< cv::L2<float> > matcher;
@@ -46,7 +50,6 @@ int main(int argc, char* argv[])
 
 	vector<cv::Vec2f> points1(matches.size());
 	vector<cv::Vec2f> points2(matches.size());
-	printf("filename = %s , line = %d\n",__FILE__,__LINE__ );
 
 	for( size_t i = 0 ; i < matches.size() ; ++i )
 	{
@@ -57,11 +60,9 @@ int main(int argc, char* argv[])
 		points2[i][1] = keypoints[1][matches[i].trainIdx].pt.y;
 	}
 
-	    printf("filename = %s , line = %d\n",__FILE__,__LINE__ );
 	Mat homo = cv::findHomography(points1, points2, CV_RANSAC);
 	cv::warpPerspective(src[0], result, homo, Size(static_cast<int>(src[0].cols * 1.5), static_cast<int>(src[0].rows * 1.1)));
 	//waitKey();
-    printf("filename = %s , line = %d\n",__FILE__,__LINE__ );
 
 
 	for (int y = 0; y < src[0].rows; y++){
@@ -69,9 +70,8 @@ int main(int argc, char* argv[])
 			result.at<Vec3b>(y, x) = src[1].at<Vec3b>(y, x);
 		}
 	}
-
-	imshow("result img", result);
-	waitKey(0);
+			
+	cv::imwrite("marged.jpg",result);
 
 	return (0);
 }
