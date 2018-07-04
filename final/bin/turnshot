@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+import os
+def main():
+	move_shot()
+def move_shot():
+	for i in range(1,9):
+		os.system("./servo " + str(i*20))
+		os.system("./snapshot " + str(i)+".jpg")
+		os.system("mv ./sample.jpg ./"+ str(i) + ".jpg")
+
+main()
