@@ -1,4 +1,0 @@
-#!/bin/bash
-./servo $1 
-./snapshot
-mv raspi-cam.jpg $2.jpg
