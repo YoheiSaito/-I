@@ -1,11 +1,42 @@
 #!/usr/bin/python3
 import os
 def main():
-	move_shot()
+	marge(range(1,9))
+	#move_shot()
+
+def toAng(angle):
+	return angle*(12.0 - 3.0)/180.0 + 3.0
+
+def turn(ang):
+	servoPin = 4
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(servoPin, GPIO.OUT)
+	servo = GPIO.PWM(servoPin, 50) 
+	servo.start(toAng(float(ang)))
+	servo.ChangeDutyCycle(toAng(float(ang)))
+	time.sleep(0.2)
+	GPIO.cleanup()
+
+def marge(numlst):
+	n = len(numlst)
+	if( n == 1):
+		return numlst[0]
+	if( n == 2):
+		cat = str(numlst[0])+str(numlst[1])
+		print("end ",numlst, cat)
+		return int(cat)
+	else:
+		fl = [numlst[i] for i in range(0,n//2) ]
+		bl = [numlst[i] for i in range(n//2, n)]
+		ft = marge(fl)
+		bt = marge(bl)
+		return marge([ft,bt])
 def move_shot():
+	# take picture
 	for i in range(1,9):
-		os.system("./servo " + str(i*20))
+		turn(i*20)
 		os.system("./snapshot " + str(i)+".jpg")
 		os.system("mv ./sample.jpg ./"+ str(i) + ".jpg")
-
+	# marge treatment
+	marge(range(1,9))
 main()
