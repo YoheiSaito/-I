@@ -1,42 +1,71 @@
 #!/usr/bin/python3
 import os
+import sys
+import RPi.GPIO as GPIO
+import time
+BINPATH="${HOME}/embed1_ws/final/bin/"
 def main():
-	marge(range(1,9))
-	#move_shot()
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	GPIO.setup(21, GPIO.OUT)
+	GPIO.add_event_detect(26, GPIO.FALLING, callback=intrpt, bouncetime=200)
+	try:
+		while(1):
+			time.sleep(1)
+	except KeyboardInterrupt:
+		GPIO.cleanup()
+def intrpt(pin):
+	if(GPIO.input(pin) == 1):
+		return
+	# take picture
+	GPIO.output(21, 1)
+	move_shot()
+	
+	# flip all picture
+	##print ("flip pictures")
+	for i in range(1,3):
+		os.system(BINPATH+"flip " + str(i)+".jpg")
+	# marge treatment
+	##print("marge start")
+	os.system(BINPATH+"panorama 1.jpg 2.jpg out.jpg ")
+	os.system("mv ./*jpg /var/www/html/Public/img")	
+	GPIO.output(21, 0)
+
+def servoInit(servoPin, ang):
+	GPIO.setup(servoPin, GPIO.OUT)
+	servo = GPIO.PWM(servoPin, 50) 
+	servo.start(toAng(ang))
+	return servo
 
 def toAng(angle):
 	return angle*(12.0 - 3.0)/180.0 + 3.0
 
 def turn(ang):
-	servoPin = 4
-	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(servoPin, GPIO.OUT)
-	servo = GPIO.PWM(servoPin, 50) 
-	servo.start(toAng(float(ang)))
-	servo.ChangeDutyCycle(toAng(float(ang)))
-	time.sleep(0.2)
-	GPIO.cleanup()
-
+	s = servoInit(4, float(ang))
+	s.ChangeDutyCycle(toAng(float(ang)))
+	time.sleep(0.4)
 def marge(numlst):
+	num = [str(i) for i in numlst]
 	n = len(numlst)
 	if( n == 1):
 		return numlst[0]
 	if( n == 2):
-		cat = str(numlst[0])+str(numlst[1])
-		print("end ",numlst, cat)
+		s1 = str(numlst[0])
+		s2 = str(numlst[1])
+		cat = s1+s2
+		os.system(BINPATH+"panorama "+ s1 + ".jpg "+ s2 + ".jpg "+ cat + ".jpg ")
+		##print(cat)
 		return int(cat)
 	else:
 		fl = [numlst[i] for i in range(0,n//2) ]
 		bl = [numlst[i] for i in range(n//2, n)]
 		ft = marge(fl)
 		bt = marge(bl)
-		return marge([ft,bt])
+		return marge([ft, bt])
+
 def move_shot():
-	# take picture
-	for i in range(1,9):
+	for i in range(1,3):
 		turn(i*20)
-		os.system("./snapshot " + str(i)+".jpg")
-		os.system("mv ./sample.jpg ./"+ str(i) + ".jpg")
-	# marge treatment
-	marge(range(1,9))
+		os.system(BINPATH+"snapshot " + str(i)+".jpg")
+		os.system("mv sample.jpg "+ str(i) + ".jpg")
 main()

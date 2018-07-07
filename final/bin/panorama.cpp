@@ -20,23 +20,17 @@ int main(int argc, char* argv[])
 	Mat src[2];
 	Mat gray[2];
 	Mat result;
-	if(argc == 5){
-		auto tmp1 = imread(argv[1]);
-		auto tmp2 = imread(argv[2]);
-		cv::flip(tmp1, src[0], -1);
-		cv::flip(tmp2, src[1], -1);
-	}else if(argc == 4){
+	if(argc == 4){
 		src[0] = imread(argv[1]);
 		src[1] = imread(argv[2]);
 	}else{
-		fprintf(stderr,"usage: %s image1, image2, outputname flipflg", argv[0]);
+		fprintf(stderr,"usage: %s image1, image2, outputname\n", argv[0]);
 		exit(1);
 	}
 	cv::cvtColor(src[0], gray[0], CV_BGR2GRAY);
 	cv::cvtColor(src[1], gray[1], CV_BGR2GRAY);
-	cv::SiftFeatureDetector detector(1000);
+	cv::SiftFeatureDetector detector(900);
 	cv::SiftDescriptorExtractor extrator;
-
 	vector<cv::KeyPoint> keypoints[2];
 	Mat descriptors[2];
 	for (int i = 0; i < 2; i++){

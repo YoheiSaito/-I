@@ -1,0 +1,4 @@
+#!/bin/bash
+pushd /tmp
+${HOME}/embed1_ws/final/bin/mainsrc
+popd
