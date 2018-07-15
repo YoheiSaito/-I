@@ -48,7 +48,7 @@ def main():
 	cat = ['cat', '/var/www/html/Public/tmp/angle.dat']
 	try:
 		while(GPIO.input(19)==1 or GPIO.input(16)==1):
-			turn(int(subprocess.check_output(cat)))
+			turn(float(subprocess.check_output(cat)))
 			if(flg==26):
 				flg = chmod(flg)
 			if(flg==20):
@@ -114,9 +114,9 @@ def normalshot():
 	pa = 0
 	while(GPIO.input(20)==1):
 		if(GPIO.input(19)!=1 and a > 0):
-			a -= 1 
+			a += 1 
 		if(GPIO.input(16)!=1 and a < 180):
-			a += 1
+			a -= 1
 		servo.set_servo_pulsewidth(18, toAng(a))
 		time.sleep(0.02)
 	shutter(2592,1944, modtop[mode])
