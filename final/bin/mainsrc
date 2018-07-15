@@ -15,6 +15,7 @@ BINPATH="${HOME}/embed1_ws/final/bin/"
 # mode 4 cartoon
 # mode 5 panorama
 
+cat = ['cat', '/var/www/html/Public/tmp/angle.dat']
 modtop = ["none", "denoise","hatch","negative", "cartoon", "panorama"]
 mode = len(modtop)-1
 flg = 0
@@ -31,9 +32,9 @@ def interrupt_disable():
 	GPIO.remove_event_detect(20)
 	GPIO.remove_event_detect(26)
 def stop_uv4l():
-	os.system("pkill uv4l>/dev/null")
+	os.system("pkill uv4l >> /dev/null")
 def start_uv4l():
-	os.system("uv4l --auto-video_nr --driver raspicam --encoding mjpeg --width 640 --height 480 --quality 10 --server-option '--port=9000'> /dev/null")
+	os.system("uv4l --auto-video_nr --driver raspicam --encoding mjpeg --width 640 --height 480 --quality 10 --server-option '--port=9000' >> /dev/null")
 	pass
 def main():
 	global flg
@@ -45,10 +46,9 @@ def main():
 	GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 	interrupt_configure()
 	GPIO.output(21 ,0)
-	cat = ['cat', '/var/www/html/Public/tmp/angle.dat']
 	try:
 		while(GPIO.input(19)==1 or GPIO.input(16)==1):
-			turn(float(subprocess.check_output(cat)))
+			turn(180-float(subprocess.check_output(cat)))
 			if(flg==26):
 				flg = chmod(flg)
 			if(flg==20):
@@ -99,8 +99,8 @@ def shot(pin):
 		todaydate = datetime.now().strftime('%Y/%m/%d/')
 		os.system(BINPATH+"panorama 1.jpg 2.jpg "+tm+".jpg ")
 		os.system("rm 1.jpg 2.jpg")
-		os.system("mkdir -p /tmp/img/"+todaydate)
-		os.system("mv ./"+tm+".jpg /tmp/img/"+todaydate)	
+		os.system("mkdir -p /var/www/html/Public/tmp/img/"+todaydate)
+		os.system("mv ./"+tm+".jpg /var/www/html/Public/tmp/img/"+todaydate)	
 		print("save to rasteyo.local/img/"+todaydate+tm)
 	else:
 		normalshot()
@@ -109,7 +109,7 @@ def shot(pin):
 	return 0
 
 def normalshot():
-	a = 90
+	a = 180-float(subprocess.check_output(cat))
 	av = 1
 	pa = 0
 	while(GPIO.input(20)==1):
@@ -124,8 +124,8 @@ def normalshot():
 	todaydate = datetime.now().strftime('%Y/%m/%d/')
 	os.system(BINPATH+"flip ./sample.jpg")
 	os.system("mv ./sample.jpg ./"+tm+".jpg")
-	os.system("mkdir -p /tmp/img/"+todaydate)
-	os.system("mv ./"+tm+".jpg /tmp/img/"+todaydate)	
+	os.system("mkdir -p /var/www/html/Public/tmp/img/"+todaydate)
+	os.system("mv ./"+tm+".jpg /var/www/html/Public/tmp/img/"+todaydate)	
 	print("save to rasteyo.local/img/"+todaydate+tm)
 
 
@@ -145,9 +145,15 @@ def marge(numlst):
 	return int(cat)
 
 def move_shot():
-	servo.set_servo_pulsewidth(18, toAng(80))
+	ang = float(subprocess.check_output(cat))
+	if(ang<10): 
+		ang = 10
+	if(ang>170):
+		ang = 170
+	servo.set_servo_pulsewidth(18, toAng(ang))
+	ang -= 10 
 	for i in range(1,3):
-		servo.set_servo_pulsewidth(18, toAng(60+20*i))
+		servo.set_servo_pulsewidth(18, toAng(ang+20*i))
 		time.sleep(0.3)
 		shutter(effect=modtop[1])	
 		os.system("mv sample.jpg "+ str(i) + ".jpg")

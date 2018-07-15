@@ -1,9 +1,17 @@
-<!DOCTYPE html>
+<!DOCTYPE ht"ml>
 <html>
 <head>
 <title>UV4L Stream</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+img{
+	transform: scale(-1, -1);
+}
+</style>
+<meta http-equiv=”Pragma” content=”no-cache”>
+<meta http-equiv=”Cache-Control” content=”no-cache”>
 </head>
 <body>
 <script src="./js/jquery-3.3.1.min.js"></script>
@@ -15,8 +23,23 @@ function errorFunction() {
 	alert('Stream stopped');
 }
 </script>
-<img src="http://rasteyo.local:9000/stream/video.mjpeg" alt="image" style="transform: scale(-1, -1);" >
-<br>
+<script>
+function reloadcheck(){
+	$.ajax({
+	url: "./reload.php",
+	success: function(html){
+		if(html == "t"){
+			location.reload(false);
+		}
+	}
+	});
+	setTimeout(reloadcheck, 1000);
+}
+
+reloadcheck();
+
+</script>
+<img src="http://rasteyo.local:9000/stream/video.mjpeg"   style="transform: scale(-1,-1);", />
 
 <!--
 	control servo unit
@@ -27,7 +50,7 @@ function errorFunction() {
 value="<?php readfile("./tmp/angle.dat");?>" step="0.1" width="1" >
 <script>
 function print(){
-	var tmp = document.getElementById("ang").value.toString();
+	var tmp = String(document.getElementById("ang").value);
 	$.ajax({
 	type: "GET",
 	url: "./servobar.php",
@@ -37,7 +60,8 @@ function print(){
 	});
 	document.getElementById('angout').innerHTML=tmp;
 }
-print()
+
+print();
 </script>
 </div>
 </body>
