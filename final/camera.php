@@ -28,6 +28,7 @@ function reloadcheck(){
 	$.ajax({
 	url: "./reload.php",
 	success: function(html){
+		console.log(html);
 		if(html == "t"){
 			location.reload(false);
 		}

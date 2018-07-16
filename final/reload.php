@@ -1,8 +1,8 @@
 <?php
-	if(file_exists ( "./tmp/.restart" )){
-		exec("rm ./tmp/.restart");
-		echo "t";
-	}else{
-		echo "f";
-	}
+	$f = fopen("./tmp/.restart", "r");
+	$line = fgets($f);
+	fclose($f);
+	$c = fopen("./tmp/.restart", "w");
+	fclose($c);
+	echo trim($line);
 ?>
